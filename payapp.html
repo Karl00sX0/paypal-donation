@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تبرع الآن</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="donation-page">
+        <h1>تبرع الآن لمساعدتي وعائلتي </h1>
+        <p>تبرع بمبلغ لمساعدتنا في البقاء ومواجهة المجاعة. شكرًا لدعمك!</p>
+        
+        <!-- حقل تحديد المبلغ -->
+        <div class="amount-selection">
+            <label for="donation-amount">اختر مبلغ التبرع:</label>
+            <select id="donation-amount">
+                <option value="10">$10</option>
+                <option value="20">$20</option>
+                <option value="50">$50</option>
+                <option value="100">$100</option>
+                <option value="other">مبلغ آخر</option>
+            </select>
+            <input type="number" id="custom-amount" placeholder="أدخل المبلغ" style="display:none;" />
+        </div>
+
+        <!-- زر تحديد المبلغ -->
+        <button id="select-amount">تحديد المبلغ</button>
+
+        <!-- عرض المبلغ المحدد -->
+        <div id="selected-amount" style="display:none;">
+            <h3>المبلغ الذي اخترته: <span id="amount-display">$0</span></h3>
+            <button id="confirm-donation">موافقة ومتابعة</button>
+        </div>
+        
+        <!-- زر الدفع عبر بايبال -->
+        <div id="paypal-button-container" style="display:none;">
+            <button id="paypal-button">الدفع عبر بايبال</button>
+        </div>
+    </div>
+
+    <script src="https://www.paypal.com/sdk/js?client-id=AecYNxS-vRDDtW8Zi0tsHFsgR8nDqgm2FYUNu9sowuY1bkqZd1P25ahpbWAI__I6kI4nZAUkOoEyqeQO"></script>
+    <script>
+        document.getElementById('select-amount').addEventListener('click', function() {
+            const amount = document.getElementById('donation-amount').value;
+            const customAmount = document.getElementById('custom-amount').value;
+            const finalAmount = customAmount ? customAmount : amount;
+            
+            document.getElementById('amount-display').textContent = `$${finalAmount}`;
+            document.getElementById('selected-amount').style.display = 'block';
+            document.getElementById('paypal-button-container').style.display = 'block';
+        });
+
+        // إظهار حقل المبلغ الآخر إذا اختار المستخدم "مبلغ آخر"
+        document.getElementById('donation-amount').addEventListener('change', function() {
+            if (this.value === 'other') {
+                document.getElementById('custom-amount').style.display = 'block';
+            } else {
+                document.getElementById('custom-amount').style.display = 'none';
+            }
+        });
+
+        // إضافة زر بايبال
+        paypal.Buttons({
+            createOrder: function(data, actions) {
+                return actions.order.create({
+                    purchase_units: [{
+                        amount: {
+                            value: document.getElementById('amount-display').textContent.replace('$', '')
+                        }
+                    }]
+                });
+            },
+            onApprove: function(data, actions) {
+                return actions.order.capture().then(function(details) {
+                    alert('تم التبرع بنجاح! شكراً لدعمك.');
+                });
+            }
+        }).render('#paypal-button-container');
+    </script>
+</body>
+</html>
